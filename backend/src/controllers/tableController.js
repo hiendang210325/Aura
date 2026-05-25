@@ -1,100 +1,72 @@
-const asyncHandler = require("express-async-handler");
-const createHttpError = require("http-errors");
 const Table = require("../models/tableModel");
+const BaseController = require("./BaseController");
+const BaseRepository = require("../repositories/BaseRepository");
 
 /**
- * getTables: Lấy danh sách toàn bộ bàn
+ * TableController — Kế thừa BaseController, override create và delete
+ * vì create cần check duplicate tableId, delete dùng findById + deleteOne.
  */
-const getTables = asyncHandler(async (req, res, next) => {
-  const filter = {};
-  if (req.query.area) {
-    filter.area = req.query.area;
+class TableController extends BaseController {
+  constructor() {
+    super(new BaseRepository(Table), "bàn", {
+      defaultSort: { tableId: 1 },
+    });
   }
 
-  const tables = await Table.find(filter).sort({ tableId: 1 });
-
-  res.status(200).json({
-    success: true,
-    count: tables.length,
-    data: tables,
-  });
-});
-
-/**
- * createTable: Thêm bàn mới
- */
-const createTable = asyncHandler(async (req, res, next) => {
-  const { tableId, area, capacity, status } = req.body;
-
-  if (!tableId || !area || !capacity) {
-    throw createHttpError(400, "Please provide tableId, area, and capacity");
+  /** Override: Filter theo area */
+  buildFilter(query) {
+    const filter = {};
+    if (query.area) filter.area = query.area;
+    return filter;
   }
 
-  // Check if table already exists
-  const existingTable = await Table.findOne({ tableId });
-  if (existingTable) {
-    throw createHttpError(400, "Table ID already exists");
+  /** Override: Check duplicate tableId trước khi tạo */
+  async create(req, res, next) {
+    try {
+      const { tableId, area, capacity, status } = req.body;
+
+      if (!tableId || !area || !capacity) {
+        res.status(400);
+        return next(new Error("Please provide tableId, area, and capacity"));
+      }
+
+      // Check if table already exists
+      const existingTable = await this.repository.findOne({ tableId });
+      if (existingTable) {
+        res.status(400);
+        return next(new Error("Table ID already exists"));
+      }
+
+      const table = await this.repository.create({
+        tableId,
+        area,
+        capacity,
+        status: status || "Còn trống",
+      });
+
+      res.status(201).json({ success: true, data: table });
+    } catch (err) {
+      next(err);
+    }
   }
 
-  const table = await Table.create({
-    tableId,
-    area,
-    capacity,
-    status: status || "Còn trống"
-  });
+  /** Override: Dùng findById + deleteOne thay vì findByIdAndDelete (giữ nguyên hành vi cũ) */
+  async delete(req, res, next) {
+    try {
+      const table = await this.repository.findById(req.params.id);
 
-  res.status(201).json({
-    success: true,
-    data: table,
-  });
-});
+      if (!table) {
+        res.status(404);
+        return next(new Error("Không tìm thấy bàn"));
+      }
 
-/**
- * updateTable: Cập nhật thông tin bàn
- */
-const updateTable = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
+      await table.deleteOne();
 
-  let table = await Table.findById(id);
-
-  if (!table) {
-    throw createHttpError(404, "Table not found");
+      res.json({ success: true, message: "Đã xóa bàn thành công" });
+    } catch (err) {
+      next(err);
+    }
   }
+}
 
-  table = await Table.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  res.status(200).json({
-    success: true,
-    data: table,
-  });
-});
-
-/**
- * deleteTable: Xóa bàn
- */
-const deleteTable = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-
-  const table = await Table.findById(id);
-
-  if (!table) {
-    throw createHttpError(404, "Table not found");
-  }
-
-  await table.deleteOne();
-
-  res.status(200).json({
-    success: true,
-    message: "Table removed successfully",
-  });
-});
-
-module.exports = {
-  getTables,
-  createTable,
-  updateTable,
-  deleteTable,
-};
+module.exports = new TableController();

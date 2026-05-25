@@ -1,170 +1,120 @@
-const asyncHandler = require("express-async-handler");
-const createHttpError = require("http-errors");
 const Reservation = require("../models/reservationModel");
+const BaseController = require("./BaseController");
+const BaseRepository = require("../repositories/BaseRepository");
 
 /**
- * getReservations: Lấy danh sách (Có thể tích hợp thêm filter theo status).
+ * ReservationController — Kế thừa BaseController, override create và delete
+ * vì logic tạo đặt bàn phức tạp hơn CRUD chuẩn (phân biệt admin vs customer).
  */
-const getReservations = asyncHandler(async (req, res, next) => {
-  const filter = {};
-  if (req.query.status) {
-    filter.status = req.query.status;
-  }
-  // Nếu query theo date
-  if (req.query.date) {
-    filter.date = req.query.date;
-  }
+class ReservationController extends BaseController {
+  constructor() {
+    super(new BaseRepository(Reservation), "đặt bàn", {
+      defaultSort: { createdAt: -1 },
+    });
 
-  // Sắp xếp mới nhất lên đầu
-  const reservations = await Reservation.find(filter).sort({ createdAt: -1 });
-
-  res.status(200).json({
-    success: true,
-    count: reservations.length,
-    data: reservations,
-  });
-});
-
-/**
- * createReservation: Thêm mới đặt bàn (Admin).
- */
-const createReservation = asyncHandler(async (req, res, next) => {
-  const { name, phone, email, date, time, guests, type, area, table, combo, notes, status } = req.body;
-
-  if (!name || !phone || !date || !time || !guests) {
-    throw createHttpError(400, "Please provide all required fields");
+    // Bind method riêng
+    this.createPublic = this.createPublic.bind(this);
   }
 
-  const reservation = await Reservation.create({
-    name,
-    phone,
-    email: email || "",
-    date,
-    time,
-    guests,
-    type: type || "Standard",
-    area: area || "Sảnh chính",
-    table: table || "Chưa phân",
-    combo: combo || "",
-    notes: notes || "",
-    source: "admin",
-    status: status || "Pending",
-  });
-
-  res.status(201).json({
-    success: true,
-    data: reservation,
-  });
-});
-
-/**
- * createPublicReservation: Khách hàng đặt bàn từ website (không cần đăng nhập).
- */
-const createPublicReservation = asyncHandler(async (req, res, next) => {
-  const { name, phone, email, date, time, guests, type, area, combo, notes } = req.body;
-
-  // Validate các trường bắt buộc
-  if (!name || !phone || !date || !time || !guests) {
-    throw createHttpError(400, "Vui lòng điền đầy đủ thông tin bắt buộc (Họ tên, SĐT, Ngày, Giờ, Số khách)");
+  /** Override: Filter theo status và date */
+  buildFilter(query) {
+    const filter = {};
+    if (query.status) filter.status = query.status;
+    if (query.date) filter.date = query.date;
+    return filter;
   }
 
-  const reservation = await Reservation.create({
-    name,
-    phone,
-    email: email || "",
-    date,
-    time,
-    guests: Number(guests),
-    type: type || "Standard",
-    area: area || "Sảnh chính",
-    table: "Chưa phân",
-    combo: combo || "",
-    notes: notes || "",
-    source: "customer",
-    status: "Pending",
-  });
+  /** Override: Tạo đặt bàn từ Admin (có validate thủ công, set source = "admin") */
+  async create(req, res, next) {
+    try {
+      const { name, phone, email, date, time, guests, type, area, table, combo, notes, status } =
+        req.body;
 
-  res.status(201).json({
-    success: true,
-    message: "Đặt bàn thành công! Chúng tôi sẽ liên hệ xác nhận sớm nhất.",
-    data: reservation,
-  });
-});
+      if (!name || !phone || !date || !time || !guests) {
+        res.status(400);
+        return next(new Error("Please provide all required fields"));
+      }
 
-/**
- * updateReservation: Cập nhật toàn bộ thông tin (dùng cho Edit).
- */
-const updateReservation = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
+      const reservation = await this.repository.create({
+        name,
+        phone,
+        email: email || "",
+        date,
+        time,
+        guests,
+        type: type || "Standard",
+        area: area || "Sảnh chính",
+        table: table || "Chưa phân",
+        combo: combo || "",
+        notes: notes || "",
+        source: "admin",
+        status: status || "Pending",
+      });
 
-  let reservation = await Reservation.findById(id);
-
-  if (!reservation) {
-    throw createHttpError(404, "Reservation not found");
+      res.status(201).json({ success: true, data: reservation });
+    } catch (err) {
+      next(err);
+    }
   }
 
-  reservation = await Reservation.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  /**
+   * POST /public — Khách hàng đặt bàn từ website (không cần đăng nhập).
+   * Luôn set source = "customer", table = "Chưa phân", status = "Pending".
+   */
+  async createPublic(req, res, next) {
+    try {
+      const { name, phone, email, date, time, guests, type, area, combo, notes } = req.body;
 
-  res.status(200).json({
-    success: true,
-    data: reservation,
-  });
-});
+      if (!name || !phone || !date || !time || !guests) {
+        res.status(400);
+        return next(
+          new Error("Vui lòng điền đầy đủ thông tin bắt buộc (Họ tên, SĐT, Ngày, Giờ, Số khách)")
+        );
+      }
 
-/**
- * updateReservationStatus: Cập nhật nhanh trạng thái (Dành cho nút Check, X).
- */
-const updateReservationStatus = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const { status } = req.body;
+      const reservation = await this.repository.create({
+        name,
+        phone,
+        email: email || "",
+        date,
+        time,
+        guests: Number(guests),
+        type: type || "Standard",
+        area: area || "Sảnh chính",
+        table: "Chưa phân",
+        combo: combo || "",
+        notes: notes || "",
+        source: "customer",
+        status: "Pending",
+      });
 
-  if (!status) {
-    throw createHttpError(400, "Please provide a status");
+      res.status(201).json({
+        success: true,
+        message: "Đặt bàn thành công! Chúng tôi sẽ liên hệ xác nhận sớm nhất.",
+        data: reservation,
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 
-  let reservation = await Reservation.findById(id);
+  /** Override: Dùng findById + deleteOne thay vì findByIdAndDelete (giữ nguyên hành vi cũ) */
+  async delete(req, res, next) {
+    try {
+      const reservation = await this.repository.findById(req.params.id);
 
-  if (!reservation) {
-    throw createHttpError(404, "Reservation not found");
+      if (!reservation) {
+        res.status(404);
+        return next(new Error("Không tìm thấy đặt bàn"));
+      }
+
+      await reservation.deleteOne();
+
+      res.json({ success: true, message: "Đã xóa đặt bàn thành công" });
+    } catch (err) {
+      next(err);
+    }
   }
+}
 
-  reservation.status = status;
-  await reservation.save();
-
-  res.status(200).json({
-    success: true,
-    data: reservation,
-  });
-});
-
-/**
- * deleteReservation: Xóa (Dành cho nút Delete/More).
- */
-const deleteReservation = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-
-  const reservation = await Reservation.findById(id);
-
-  if (!reservation) {
-    throw createHttpError(404, "Reservation not found");
-  }
-
-  await reservation.deleteOne();
-
-  res.status(200).json({
-    success: true,
-    message: "Reservation removed successfully",
-  });
-});
-
-module.exports = {
-  getReservations,
-  createReservation,
-  createPublicReservation,
-  updateReservation,
-  updateReservationStatus,
-  deleteReservation,
-};
+module.exports = new ReservationController();
