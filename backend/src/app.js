@@ -23,23 +23,31 @@ const allowedOrigins = (
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const corsOptions = {
-  credentials: true,
-  origin(origin, callback) {
-    if (
-      !origin ||
-      process.env.NODE_ENV !== "production" ||
-      allowedOrigins.includes(origin)
-    ) {
-      return callback(null, true);
-    }
+const isSameOrigin = (origin, req) => {
+  if (!origin || !req.headers.host) return false;
 
-    return callback(new Error("Not allowed by CORS"));
-  },
+  try {
+    return new URL(origin).host === req.headers.host;
+  } catch (error) {
+    return false;
+  }
+};
+
+const corsOptionsDelegate = (req, callback) => {
+  const origin = req.headers.origin;
+  const isAllowed =
+    !origin ||
+    process.env.NODE_ENV !== "production" ||
+    allowedOrigins.includes(origin) ||
+    isSameOrigin(origin, req);
+
+  callback(null, {
+    credentials: true,
+    origin: isAllowed ? origin || true : false,
+  });
 };
 
 // Middlewares
-app.use(cors(corsOptions)); // Allow Cross-Origin requests
 app.use(express.json({ limit: "10mb" })); // Body parser for JSON — tăng giới hạn để hỗ trợ ảnh Base64
 app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Body parser for urlencoded data
 
@@ -48,6 +56,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Routes
+app.use("/api", cors(corsOptionsDelegate)); // Allow Cross-Origin API requests
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/reservations", reservationRoutes);
 app.use("/api/v1/tables", tableRoutes);
