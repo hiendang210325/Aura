@@ -275,27 +275,6 @@ const GalleryPage = () => {
         </div>
       </section>
 
-      {/* 3. Gallery Category Filter Section */}
-      <section className="py-6 md:py-8 bg-charcoal-light border-y border-gold/10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar justify-start lg:justify-center">
-            {galleryCategories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveTab(cat)}
-                className={`whitespace-nowrap px-6 py-2.5 rounded-full text-xs tracking-widest uppercase transition-all duration-300 ${
-                  activeTab === cat
-                    ? "bg-gold text-charcoal font-medium"
-                    : "bg-charcoal border border-gold/20 text-cream-muted hover:border-gold/60 hover:text-cream"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* 5. Masonry Gallery Grid */}
       <section className="py-20 px-6 lg:px-8 max-w-7xl mx-auto min-h-[50vh]">
         <div className="text-center mb-12">
@@ -303,6 +282,22 @@ const GalleryPage = () => {
             Khám Phá Nhà Hàng Của Chúng Tôi
           </h2>
           <div className="w-16 h-0.5 bg-gold mx-auto"></div>
+        </div>
+
+        <div className="mb-12 flex items-center gap-2 overflow-x-auto no-scrollbar justify-start lg:justify-center">
+          {galleryCategories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveTab(cat)}
+              className={`whitespace-nowrap px-6 py-2.5 rounded-full text-xs tracking-widest uppercase transition-all duration-300 ${
+                activeTab === cat
+                  ? "bg-gold text-charcoal font-medium"
+                  : "bg-charcoal border border-gold/20 text-cream-muted hover:border-gold/60 hover:text-cream"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* CSS-based Masonry Grid approximation using columns */}

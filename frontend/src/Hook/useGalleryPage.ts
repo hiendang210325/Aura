@@ -10,7 +10,7 @@ type GalleryImage = {
 };
 
 export const useGalleryPage = (galleryImages: GalleryImage[]) => {
-  const [activeTab, setActiveTab] = useState("All");
+  const [activeTab, setActiveTab] = useState("Tất cả");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [dbFoods, setDbFoods] = useState<any[]>([]);

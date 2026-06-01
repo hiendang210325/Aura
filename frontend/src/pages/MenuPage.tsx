@@ -12,17 +12,12 @@ import {
   Utensils,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { useMenuPage } from "../Hook/useMenuPage";
 
-const categories = [
-  "Tất cả",
-  "Khai vị",
-  "Món chính",
-  "Tráng miệng",
-  "Đồ uống",
-];
+const categories = ["Tất cả", "Khai vị", "Món chính", "Tráng miệng", "Đồ uống"];
 
 const fieldClass =
   "w-full rounded-[8px] border border-gold/25 bg-charcoal/70 px-4 py-3 text-sm text-cream outline-none transition-colors placeholder:text-cream/35 focus:border-gold";
@@ -114,7 +109,8 @@ export default function MenuPage() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="mt-6 md:mt-8 max-w-2xl text-sm sm:text-base leading-7 md:leading-8 text-cream/75 md:text-lg mx-auto sm:mx-0"
               >
-                Khám phá các món ăn cao cấp, gợi ý từ bếp trưởng và các combo dành cho nhóm được thiết kế cho mọi dịp đặc biệt.
+                Khám phá các món ăn cao cấp, gợi ý từ bếp trưởng và các combo
+                dành cho nhóm được thiết kế cho mọi dịp đặc biệt.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 24 }}
@@ -122,7 +118,10 @@ export default function MenuPage() {
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="mt-8 md:mt-10 flex flex-col sm:flex-row justify-center sm:justify-start gap-4"
               >
-                <a href="#full-menu" className="lux-button w-full sm:w-auto px-8 py-3.5 text-center">
+                <a
+                  href="#full-menu"
+                  className="lux-button w-full sm:w-auto px-8 py-3.5 text-center"
+                >
                   Xem Món Ăn
                 </a>
                 <a
@@ -165,7 +164,9 @@ export default function MenuPage() {
                     Độ phổ biến
                   </option>
                   <option className="bg-charcoal">Bán chạy nhất</option>
-                  <option className="bg-charcoal">Lựa chọn của bếp trưởng</option>
+                  <option className="bg-charcoal">
+                    Lựa chọn của bếp trưởng
+                  </option>
                   <option className="bg-charcoal">Món mới</option>
                 </select>
                 <select className={selectClass} defaultValue="">
@@ -196,7 +197,7 @@ export default function MenuPage() {
               ))}
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-3">
+            {/* <div className="mt-4 flex flex-wrap gap-3">
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full border border-gold/25 px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs text-cream/70 transition-colors hover:border-gold hover:text-gold"
@@ -211,11 +212,14 @@ export default function MenuPage() {
                 <Star size={14} />
                 Bán chạy nhất
               </button>
-            </div>
+            </div> */}
           </div>
         </section>
 
-        <section id="combos" className="border-b border-gold/10 bg-charcoal py-16 md:py-24">
+        <section
+          id="combos"
+          className="border-b border-gold/10 bg-charcoal py-16 md:py-24"
+        >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeader
               label="Nổi Bật"
@@ -226,7 +230,9 @@ export default function MenuPage() {
             {loading ? (
               <div className="text-center text-gold">Đang tải dữ liệu...</div>
             ) : combos.length === 0 ? (
-              <div className="text-center text-cream/50">Không có combo nào.</div>
+              <div className="text-center text-cream/50">
+                Không có combo nào.
+              </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
@@ -250,7 +256,10 @@ export default function MenuPage() {
                       )}
                       <div className="relative aspect-[4/3] w-full overflow-hidden shrink-0 bg-charcoal-light">
                         <img
-                          src={combo.image || "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600&auto=format&fit=crop"}
+                          src={
+                            combo.image ||
+                            "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600&auto=format&fit=crop"
+                          }
                           alt={combo.name}
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                           loading="lazy"
@@ -291,7 +300,9 @@ export default function MenuPage() {
                           <a
                             href="#reservation"
                             className={`w-full px-5 py-3 text-center text-[11px] md:text-xs ${
-                              combo.featured ? "lux-button" : "lux-button-outline"
+                              combo.featured
+                                ? "lux-button"
+                                : "lux-button-outline"
                             }`}
                           >
                             Đặt Combo Này
@@ -334,74 +345,78 @@ export default function MenuPage() {
             {loading ? (
               <div className="text-center text-gold">Đang tải dữ liệu...</div>
             ) : filteredMenu.length === 0 ? (
-              <div className="text-center text-cream/50">Không có món ăn nào trong danh mục này.</div>
+              <div className="text-center text-cream/50">
+                Không có món ăn nào trong danh mục này.
+              </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {currentMenu.map((item, index) => (
-                    <motion.article
-                    key={item._id}
-                    initial={{ opacity: 0, y: 18 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-60px" }}
-                    transition={{ duration: 0.45, delay: (index % 6) * 0.035 }}
-                    className={`group overflow-hidden rounded-[8px] border bg-charcoal shadow-[0_18px_48px_rgba(0,0,0,0.22)] transition-all duration-500 hover:border-gold/40 flex flex-col h-full w-full ${
-                      item.status === "Còn hàng"
-                        ? "border-gold/12"
-                        : "border-cream/10 opacity-60 grayscale-[35%]"
-                    }`}
-                  >
-                    <div className="relative h-[220px] sm:h-[240px] w-full shrink-0 overflow-hidden bg-charcoal-light">
-                      <img
-                        src={item.image || "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600&auto=format&fit=crop"}
-                        alt={item.name}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
-                    </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      <div className="mb-3 flex items-center justify-between gap-3">
-                        <span className="rounded-full border border-gold/20 bg-charcoal/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[1.3px] text-gold">
-                          {item.category}
-                        </span>
-                        <span
-                          className={`text-[10px] font-semibold uppercase tracking-[1.2px] ${
-                            item.status === "Còn hàng" ? "text-cream/45" : "text-gold"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </div>
-                      <h3 className="text-xl sm:text-[24px] leading-tight text-cream">
-                        {item.name}
-                      </h3>
-                      <p className="mt-2 sm:mt-3 flex-1 text-xs sm:text-sm leading-6 text-cream/55 line-clamp-3">
-                        {item.description}
-                      </p>
-                      <div className="mt-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                        <span className="text-lg font-semibold text-gold">
-                          {formatPrice(item.price)}
-                        </span>
-                        <div className="flex gap-2 w-full sm:w-auto">
-                          <button
-                            type="button"
-                            disabled={item.status !== "Còn hàng"}
-                            className="flex-1 sm:flex-none justify-center text-center rounded-full border border-gold/25 px-4 py-2 text-[10px] font-semibold uppercase tracking-[1.3px] text-cream transition-colors hover:border-gold hover:text-gold disabled:pointer-events-none disabled:text-cream/35"
-                          >
-                            Chi Tiết
-                          </button>
-                          <button
-                            type="button"
-                            disabled={item.status !== "Còn hàng"}
-                            className="flex-1 sm:flex-none justify-center text-center rounded-full bg-gold px-4 py-2 text-[10px] font-bold uppercase tracking-[1.3px] text-charcoal transition-colors hover:bg-gold-hover disabled:pointer-events-none disabled:bg-cream/20 disabled:text-cream/40"
-                          >
-                            Thêm
-                          </button>
+                    <Link
+                      key={item._id}
+                      to={`/menu/${item._id}`}
+                      className="block h-full rounded-[8px] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#151210]"
+                      aria-label={`Xem chi tiết ${item.name}`}
+                    >
+                      <motion.article
+                        initial={{ opacity: 0, y: 18 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-60px" }}
+                        transition={{
+                          duration: 0.45,
+                          delay: (index % 6) * 0.035,
+                        }}
+                        className={`group overflow-hidden rounded-[8px] border bg-charcoal shadow-[0_18px_48px_rgba(0,0,0,0.22)] transition-all duration-500 hover:-translate-y-1 hover:border-gold/40 flex flex-col h-full w-full ${
+                          item.status === "Còn hàng"
+                            ? "border-gold/12"
+                            : "border-cream/10 opacity-60 grayscale-[35%]"
+                        }`}
+                      >
+                        <div className="relative h-[220px] sm:h-[240px] w-full shrink-0 overflow-hidden bg-charcoal-light">
+                          <img
+                            src={
+                              item.image ||
+                              "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600&auto=format&fit=crop"
+                            }
+                            alt={item.name}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
                         </div>
-                      </div>
-                    </div>
-                    </motion.article>
+                        <div className="flex flex-1 flex-col p-5">
+                          <div className="mb-3 flex items-center justify-between gap-3">
+                            <span className="rounded-full border border-gold/20 bg-charcoal/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[1.3px] text-gold">
+                              {item.category}
+                            </span>
+                            <span
+                              className={`text-[10px] font-semibold uppercase tracking-[1.2px] ${
+                                item.status === "Còn hàng"
+                                  ? "text-cream/45"
+                                  : "text-gold"
+                              }`}
+                            >
+                              {item.status}
+                            </span>
+                          </div>
+                          <h3 className="text-xl sm:text-[24px] leading-tight text-cream transition-colors group-hover:text-gold">
+                            {item.name}
+                          </h3>
+                          <p className="mt-2 sm:mt-3 flex-1 text-xs sm:text-sm leading-6 text-cream/55 line-clamp-3">
+                            {item.description}
+                          </p>
+                          <div className="mt-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                            <span className="text-lg font-semibold text-gold">
+                              {formatPrice(item.price)}
+                            </span>
+                            <span className="inline-flex items-center justify-center gap-2 rounded-full border border-gold/25 px-4 py-2 text-[10px] font-semibold uppercase tracking-[1.3px] text-cream transition-colors group-hover:border-gold group-hover:text-gold">
+                              Chi Tiết
+                              <ChevronRight size={14} />
+                            </span>
+                          </div>
+                        </div>
+                      </motion.article>
+                    </Link>
                   ))}
                 </div>
                 {totalMenuPages > 1 && (
@@ -437,13 +452,20 @@ export default function MenuPage() {
               Đã tìm thấy món yêu thích?
             </h2>
             <p className="mx-auto mt-4 md:mt-6 max-w-2xl text-sm sm:text-base leading-7 md:leading-8 text-cream/65">
-              Hãy đặt bàn ngay hôm nay để tận hưởng không gian sang trọng và trải nghiệm ẩm thực đẳng cấp.
+              Hãy đặt bàn ngay hôm nay để tận hưởng không gian sang trọng và
+              trải nghiệm ẩm thực đẳng cấp.
             </p>
             <div className="mt-8 md:mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-              <a href="#reservation" className="lux-button w-full sm:w-auto px-9 py-3.5">
+              <a
+                href="#reservation"
+                className="lux-button w-full sm:w-auto px-9 py-3.5"
+              >
                 Đặt Bàn Ngay
               </a>
-              <a href="#reservation" className="lux-button-outline w-full sm:w-auto px-9 py-3.5">
+              <a
+                href="#reservation"
+                className="lux-button-outline w-full sm:w-auto px-9 py-3.5"
+              >
                 Đặt Combo
               </a>
             </div>
@@ -461,11 +483,15 @@ export default function MenuPage() {
                   Đặt chỗ tại Aura.
                 </h2>
                 <p className="mt-4 md:mt-5 max-w-md mx-auto lg:mx-0 text-sm leading-6 md:leading-7 text-cream/60">
-                  Chọn ngày giờ và số lượng khách. Đội ngũ của chúng tôi sẽ xác nhận và chuẩn bị bàn phù hợp nhất cho bạn.
+                  Chọn ngày giờ và số lượng khách. Đội ngũ của chúng tôi sẽ xác
+                  nhận và chuẩn bị bàn phù hợp nhất cho bạn.
                 </p>
                 <div className="mt-6 md:mt-8 grid max-w-md mx-auto lg:mx-0 gap-4 grid-cols-1 sm:grid-cols-2 text-left">
                   <div className="rounded-[8px] border border-gold/16 bg-charcoal-light p-4 md:p-5">
-                    <Clock size={18} className="mb-2 md:mb-3 text-gold md:w-[20px] md:h-[20px]" />
+                    <Clock
+                      size={18}
+                      className="mb-2 md:mb-3 text-gold md:w-[20px] md:h-[20px]"
+                    />
                     <span className="block text-[10px] md:text-[11px] uppercase tracking-[1.4px] text-cream/40">
                       Giờ mở cửa
                     </span>
@@ -474,7 +500,10 @@ export default function MenuPage() {
                     </strong>
                   </div>
                   <div className="rounded-[8px] border border-gold/16 bg-charcoal-light p-4 md:p-5">
-                    <GlassWater size={18} className="mb-2 md:mb-3 text-gold md:w-[20px] md:h-[20px]" />
+                    <GlassWater
+                      size={18}
+                      className="mb-2 md:mb-3 text-gold md:w-[20px] md:h-[20px]"
+                    />
                     <span className="block text-[10px] md:text-[11px] uppercase tracking-[1.4px] text-cream/40">
                       Phong cách
                     </span>
@@ -494,7 +523,11 @@ export default function MenuPage() {
                     <label className="mb-2 block text-[10px] md:text-[11px] uppercase tracking-[1.5px] text-cream/55">
                       Họ và tên
                     </label>
-                    <input className={fieldClass} type="text" placeholder="Nguyễn Văn A" />
+                    <input
+                      className={fieldClass}
+                      type="text"
+                      placeholder="Nguyễn Văn A"
+                    />
                   </div>
                   <div>
                     <label className="mb-2 block text-[10px] md:text-[11px] uppercase tracking-[1.5px] text-cream/55">
@@ -530,15 +563,22 @@ export default function MenuPage() {
                       <option className="bg-charcoal">4 người</option>
                       <option className="bg-charcoal">6 người</option>
                       <option className="bg-charcoal">8 người</option>
-                      <option className="bg-charcoal">Từ 10 người trở lên</option>
+                      <option className="bg-charcoal">
+                        Từ 10 người trở lên
+                      </option>
                     </select>
                   </div>
                   <div>
                     <label className="mb-2 block text-[10px] md:text-[11px] uppercase tracking-[1.5px] text-cream/55">
                       Hình thức
                     </label>
-                    <select className={selectClass} defaultValue="Standard table booking">
-                      <option className="bg-charcoal">Đặt bàn thông thường</option>
+                    <select
+                      className={selectClass}
+                      defaultValue="Standard table booking"
+                    >
+                      <option className="bg-charcoal">
+                        Đặt bàn thông thường
+                      </option>
                       <option className="bg-charcoal">Sử dụng Combo</option>
                       <option className="bg-charcoal">Tiệc sinh nhật</option>
                       <option className="bg-charcoal">Sự kiện công ty</option>
@@ -550,8 +590,10 @@ export default function MenuPage() {
                     </label>
                     <select className={selectClass} defaultValue="None">
                       <option className="bg-charcoal">Không có</option>
-                      {combos.map(combo => (
-                        <option key={combo._id} className="bg-charcoal">{combo.name}</option>
+                      {combos.map((combo) => (
+                        <option key={combo._id} className="bg-charcoal">
+                          {combo.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -569,10 +611,18 @@ export default function MenuPage() {
                 <div className="mt-6 md:mt-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap gap-2 text-[10px] md:text-[11px] uppercase tracking-[1.2px] text-cream/45">
                     <span className="inline-flex items-center gap-1">
-                      <Flame size={12} className="text-gold md:w-[13px] md:h-[13px]" /> Đồ cay nóng
+                      <Flame
+                        size={12}
+                        className="text-gold md:w-[13px] md:h-[13px]"
+                      />{" "}
+                      Đồ cay nóng
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Leaf size={12} className="text-gold md:w-[13px] md:h-[13px]" /> Đồ chay
+                      <Leaf
+                        size={12}
+                        className="text-gold md:w-[13px] md:h-[13px]"
+                      />{" "}
+                      Đồ chay
                     </span>
                   </div>
                   <button

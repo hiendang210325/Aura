@@ -3,6 +3,7 @@ import LandingPage from "./pages/LandingPage";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import MenuPage from "./pages/MenuPage";
+import MenuDetailPage from "./pages/MenuDetailPage";
 import ReservationPage from "./pages/ReservationPage";
 import GalleryPage from "./pages/GalleryPage";
 import ContactPage from "./pages/ContactPage";
@@ -13,6 +14,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/menu" element={<MenuPage />} />
+        <Route path="/menu/:id" element={<MenuDetailPage />} />
         <Route path="/reservation" element={<ReservationPage />} />
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/contact" element={<ContactPage />} />

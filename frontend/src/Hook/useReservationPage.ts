@@ -29,6 +29,7 @@ export const useReservationPage = () => {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -47,6 +48,7 @@ export const useReservationPage = () => {
 
   const resetForm = () => {
     setSubmitState("idle");
+    setSuccessMsg("");
     setFormData(initialFormData);
   };
 
@@ -55,11 +57,17 @@ export const useReservationPage = () => {
     if (
       !formData.name ||
       !formData.phone ||
+      !formData.email ||
       !formData.date ||
       !formData.time ||
       !formData.guests
     ) {
       setErrorMsg("Vui lòng điền đầy đủ các trường bắt buộc.");
+      setSubmitState("error");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setErrorMsg("Vui lòng nhập địa chỉ email hợp lệ.");
       setSubmitState("error");
       return;
     }
@@ -71,15 +79,18 @@ export const useReservationPage = () => {
 
     setSubmitState("loading");
     setErrorMsg("");
+    setSuccessMsg("");
 
     try {
-      await axios.post("/api/v1/reservations/public", {
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
+      const guests =
+        formData.guests === "20+" ? 21 : Number(formData.guests);
+      const response = await axios.post("/api/v1/reservations/public", {
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
         date: formData.date,
         time: formData.time,
-        guests: Number(formData.guests),
+        guests,
         type: typeMap[formData.type] || "Standard",
         area:
           formData.area === "Main Hall" || formData.area === "Any"
@@ -88,6 +99,10 @@ export const useReservationPage = () => {
         combo: formData.combo === "None" ? "" : formData.combo,
         notes: formData.notes,
       });
+      setSuccessMsg(
+        response.data?.message ||
+          "Đặt bàn thành công! Email xác nhận đã được gửi đến địa chỉ của bạn.",
+      );
       setSubmitState("success");
     } catch (err: any) {
       setErrorMsg(
@@ -103,6 +118,7 @@ export const useReservationPage = () => {
     submitState,
     setSubmitState,
     errorMsg,
+    successMsg,
     handleInputChange,
     scrollToForm,
     resetForm,

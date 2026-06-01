@@ -1,6 +1,17 @@
 const Reservation = require("../models/reservationModel");
 const BaseController = require("./BaseController");
 const BaseRepository = require("../repositories/BaseRepository");
+const { sendReservationConfirmationEmail } = require("../services/emailService");
+
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || ""));
+
+const parseGuests = (guests) => {
+  if (typeof guests === "string" && guests.endsWith("+")) {
+    return Number.parseInt(guests, 10);
+  }
+
+  return Number(guests);
+};
 
 /**
  * ReservationController — Kế thừa BaseController, override create và delete
@@ -64,21 +75,37 @@ class ReservationController extends BaseController {
   async createPublic(req, res, next) {
     try {
       const { name, phone, email, date, time, guests, type, area, combo, notes } = req.body;
+      const normalizedName = String(name || "").trim();
+      const normalizedPhone = String(phone || "").trim();
+      const normalizedEmail = String(email || "").trim().toLowerCase();
 
-      if (!name || !phone || !date || !time || !guests) {
+      if (!normalizedName || !normalizedPhone || !normalizedEmail || !date || !time || !guests) {
         res.status(400);
         return next(
-          new Error("Vui lòng điền đầy đủ thông tin bắt buộc (Họ tên, SĐT, Ngày, Giờ, Số khách)")
+          new Error(
+            "Vui lòng điền đầy đủ thông tin bắt buộc (Họ tên, SĐT, Email, Ngày, Giờ, Số khách)"
+          )
         );
       }
 
+      if (!isValidEmail(normalizedEmail)) {
+        res.status(400);
+        return next(new Error("Vui lòng nhập địa chỉ email hợp lệ"));
+      }
+
+      const guestCount = parseGuests(guests);
+      if (!Number.isFinite(guestCount) || guestCount < 1) {
+        res.status(400);
+        return next(new Error("Vui lòng chọn số khách hợp lệ"));
+      }
+
       const reservation = await this.repository.create({
-        name,
-        phone,
-        email: email || "",
+        name: normalizedName,
+        phone: normalizedPhone,
+        email: normalizedEmail,
         date,
         time,
-        guests: Number(guests),
+        guests: guestCount,
         type: type || "Standard",
         area: area || "Sảnh chính",
         table: "Chưa phân",
@@ -88,9 +115,19 @@ class ReservationController extends BaseController {
         status: "Pending",
       });
 
+      let emailSent = false;
+      try {
+        emailSent = await sendReservationConfirmationEmail(reservation);
+      } catch (mailErr) {
+        console.error("Failed to send reservation confirmation email:", mailErr.message);
+      }
+
       res.status(201).json({
         success: true,
-        message: "Đặt bàn thành công! Chúng tôi sẽ liên hệ xác nhận sớm nhất.",
+        message: emailSent
+          ? "Đặt bàn thành công! Email xác nhận đã được gửi đến địa chỉ của bạn."
+          : "Đặt bàn thành công! Chúng tôi đã ghi nhận thông tin và sẽ liên hệ xác nhận sớm nhất.",
+        emailSent,
         data: reservation,
       });
     } catch (err) {
