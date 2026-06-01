@@ -1,7 +1,7 @@
 const Reservation = require("../models/reservationModel");
 const BaseController = require("./BaseController");
 const BaseRepository = require("../repositories/BaseRepository");
-const { sendReservationConfirmationEmail } = require("../services/emailService");
+const { queueReservationConfirmationEmail } = require("../services/emailService");
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || ""));
 
@@ -115,19 +115,14 @@ class ReservationController extends BaseController {
         status: "Pending",
       });
 
-      let emailSent = false;
-      try {
-        emailSent = await sendReservationConfirmationEmail(reservation);
-      } catch (mailErr) {
-        console.error("Failed to send reservation confirmation email:", mailErr.message);
-      }
+      const emailQueued = queueReservationConfirmationEmail(reservation);
 
       res.status(201).json({
         success: true,
-        message: emailSent
-          ? "Đặt bàn thành công! Email xác nhận đã được gửi đến địa chỉ của bạn."
+        message: emailQueued
+          ? "Đặt bàn thành công! Email xác nhận đang được gửi đến địa chỉ của bạn."
           : "Đặt bàn thành công! Chúng tôi đã ghi nhận thông tin và sẽ liên hệ xác nhận sớm nhất.",
-        emailSent,
+        emailQueued,
         data: reservation,
       });
     } catch (err) {

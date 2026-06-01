@@ -1,5 +1,8 @@
 const nodemailer = require("nodemailer");
 
+let cachedTransporter = null;
+let cachedConfig = null;
+
 const typeLabels = {
   Standard: "Đặt bàn tiêu chuẩn",
   Combo: "Đặt Combo",
@@ -42,6 +45,12 @@ const getMailConfig = () => {
     host,
     port,
     secure: process.env.SMTP_SECURE === "true" || port === 465,
+    pool: true,
+    maxConnections: 1,
+    maxMessages: 100,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
   };
 
   if (user && pass) {
@@ -59,6 +68,19 @@ const getMailConfig = () => {
 };
 
 const isEmailConfigured = () => Boolean(getMailConfig());
+
+const getTransporter = () => {
+  const config = getMailConfig();
+  if (!config) return null;
+
+  const configKey = JSON.stringify(config.transport);
+  if (!cachedTransporter || cachedConfig !== configKey) {
+    cachedTransporter = nodemailer.createTransport(config.transport);
+    cachedConfig = configKey;
+  }
+
+  return { transporter: cachedTransporter, config };
+};
 
 const buildReservationEmail = (reservation) => {
   const reservationId = reservation._id ? String(reservation._id) : "";
@@ -155,20 +177,43 @@ const sendReservationConfirmationEmail = async (reservation) => {
   const email = reservation.email;
   if (!email) return false;
 
-  const config = getMailConfig();
-  if (!config) {
+  const mailer = getTransporter();
+  if (!mailer) {
     console.warn("Reservation confirmation email skipped: SMTP is not configured.");
     return false;
   }
 
-  const transporter = nodemailer.createTransport(config.transport);
   const message = buildReservationEmail(reservation);
 
-  await transporter.sendMail({
-    from: `"${config.from.name}" <${config.from.address}>`,
+  await mailer.transporter.sendMail({
+    from: `"${mailer.config.from.name}" <${mailer.config.from.address}>`,
     to: email,
-    replyTo: config.replyTo,
+    replyTo: mailer.config.replyTo,
     ...message,
+  });
+
+  return true;
+};
+
+const queueReservationConfirmationEmail = (reservation) => {
+  if (!reservation?.email) return false;
+
+  const reservationData =
+    typeof reservation.toObject === "function" ? reservation.toObject() : { ...reservation };
+
+  if (!isEmailConfigured()) {
+    console.warn("Reservation confirmation email skipped: SMTP is not configured.");
+    return false;
+  }
+
+  setImmediate(() => {
+    sendReservationConfirmationEmail(reservationData)
+      .then(() => {
+        console.log(`Reservation confirmation email sent to ${reservationData.email}`);
+      })
+      .catch((err) => {
+        console.error("Failed to send reservation confirmation email:", err.message);
+      });
   });
 
   return true;
@@ -176,5 +221,6 @@ const sendReservationConfirmationEmail = async (reservation) => {
 
 module.exports = {
   isEmailConfigured,
+  queueReservationConfirmationEmail,
   sendReservationConfirmationEmail,
 };
