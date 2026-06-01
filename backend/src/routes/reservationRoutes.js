@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const reservationController = require("../controllers/reservationController");
-const { protect, admin } = require("../middlewares/authMiddleware");
+const { protect, optionalProtect, admin } = require("../middlewares/authMiddleware");
 
 // Route công khai: Khách hàng đặt bàn từ website (không cần đăng nhập)
-router.route("/public").post(reservationController.createPublic);
+router.route("/public").post(optionalProtect, reservationController.createPublic);
+router.route("/me").get(protect, reservationController.getMine);
 
 // Chức năng này dành cho Admin quản lý
 router

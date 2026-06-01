@@ -9,14 +9,37 @@ const comboRoutes = require("./routes/comboRoutes");
 const promotionRoutes = require("./routes/promotionRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const userRoutes = require("./routes/userRoutes");
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const path = require("path");
 
 // Initialize express app
 const app = express();
 
+const allowedOrigins = (
+  process.env.CORS_ORIGIN || "http://localhost:3000,http://localhost:3001"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  credentials: true,
+  origin(origin, callback) {
+    if (
+      !origin ||
+      process.env.NODE_ENV !== "production" ||
+      allowedOrigins.includes(origin)
+    ) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+};
+
 // Middlewares
-app.use(cors()); // Allow Cross-Origin requests
+app.use(cors(corsOptions)); // Allow Cross-Origin requests
 app.use(express.json({ limit: "10mb" })); // Body parser for JSON — tăng giới hạn để hỗ trợ ảnh Base64
 app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Body parser for urlencoded data
 
@@ -33,6 +56,7 @@ app.use("/api/v1/combos", comboRoutes);
 app.use("/api/v1/promotions", promotionRoutes);
 app.use("/api/v1/settings", settingsRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
+app.use("/api/v1/users", userRoutes);
 
 // Base route for testing
 if (process.env.NODE_ENV !== "production") {

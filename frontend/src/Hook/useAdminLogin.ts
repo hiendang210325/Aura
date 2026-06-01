@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { loginAdmin } from "../services/authClient";
+import { setCredentials } from "../store/slices/authSlice";
+import { useAppDispatch } from "./useStore";
 
 export const useAdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -9,6 +11,7 @@ export const useAdminLogin = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -16,16 +19,8 @@ export const useAdminLogin = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        "/api/v1/auth/admin/login",
-        {
-          email,
-          password,
-        },
-      );
-
-      localStorage.setItem("adminToken", response.data.token);
-      localStorage.setItem("adminInfo", JSON.stringify(response.data));
+      const session = await loginAdmin(email, password);
+      dispatch(setCredentials(session));
 
       navigate("/admin/dashboard");
     } catch (err: any) {

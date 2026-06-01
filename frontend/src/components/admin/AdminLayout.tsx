@@ -4,6 +4,7 @@ import {
   UtensilsCrossed,
   Coffee,
   Users,
+  ShieldCheck,
   Tag,
   Star,
   Settings,
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { id: "menu", label: "Thực Đơn", icon: Coffee },
   { id: "combos", label: "Combo Ăn Uống", icon: Coffee }, // Could use a different icon
   { id: "customers", label: "Khách Hàng", icon: Users },
+  { id: "users", label: "Người Dùng", icon: ShieldCheck },
   { id: "promotions", label: "Khuyến Mãi", icon: Tag },
   { id: "reviews", label: "Đánh Giá", icon: Star },
   { id: "settings", label: "Cài Đặt", icon: Settings },
@@ -45,6 +47,9 @@ export default function AdminLayout({
     isProfileOpen,
     setIsProfileOpen,
     toggleSidebar,
+    adminName,
+    adminInitials,
+    handleLogout,
   } = useAdminLayout();
 
   return (
@@ -109,7 +114,11 @@ export default function AdminLayout({
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-cream/60 hover:bg-red-500/10 hover:text-red-400 transition-colors">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-cream/60 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+          >
             <LogOut size={18} />
             <span>Đăng Xuất</span>
           </button>
@@ -156,10 +165,10 @@ export default function AdminLayout({
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
               >
                 <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold font-medium border border-gold/30">
-                  AD
+                  {adminInitials}
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-cream">Admin User</p>
+                  <p className="text-sm font-medium text-cream">{adminName}</p>
                   <p className="text-xs text-cream/50">Quản Lý</p>
                 </div>
                 <ChevronDown
@@ -173,7 +182,11 @@ export default function AdminLayout({
                   <button className="w-full text-left px-4 py-2 text-sm text-cream/70 hover:text-cream hover:bg-white/5">
                     Hồ Sơ Cài Đặt
                   </button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 mt-1">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 mt-1"
+                  >
                     Đăng Xuất
                   </button>
                 </div>

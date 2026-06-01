@@ -32,7 +32,39 @@ const formatDate = (dateValue) => {
   }).format(new Date(year, month - 1, day));
 };
 
+const getEmailConfigStatus = () => {
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  const fromAddress = process.env.MAIL_FROM_ADDRESS || user;
+  const missing = [];
+
+  if (!host) missing.push("SMTP_HOST");
+  if (!fromAddress) missing.push("MAIL_FROM_ADDRESS or SMTP_USER");
+
+  if (host?.includes("gmail.com")) {
+    if (!user) missing.push("SMTP_USER");
+    if (!pass) missing.push("SMTP_PASS");
+  } else if ((user && !pass) || (!user && pass)) {
+    missing.push(user ? "SMTP_PASS" : "SMTP_USER");
+  }
+
+  return {
+    configured: missing.length === 0,
+    missing,
+    host: host || "",
+    port: process.env.SMTP_PORT || "587",
+    secure: process.env.SMTP_SECURE || "false",
+    userConfigured: Boolean(user),
+    passConfigured: Boolean(pass),
+    fromAddressConfigured: Boolean(fromAddress),
+  };
+};
+
 const getMailConfig = () => {
+  const status = getEmailConfigStatus();
+  if (!status.configured) return null;
+
   const host = process.env.SMTP_HOST;
   const port = Number(process.env.SMTP_PORT || 587);
   const user = process.env.SMTP_USER;
@@ -202,9 +234,17 @@ const queueReservationConfirmationEmail = (reservation) => {
     typeof reservation.toObject === "function" ? reservation.toObject() : { ...reservation };
 
   if (!isEmailConfigured()) {
-    console.warn("Reservation confirmation email skipped: SMTP is not configured.");
+    const status = getEmailConfigStatus();
+    console.warn(
+      `Reservation confirmation email skipped: SMTP is not configured. Missing: ${status.missing.join(", ")}`
+    );
     return false;
   }
+
+  const status = getEmailConfigStatus();
+  console.log(
+    `Reservation confirmation email queued for ${reservationData.email} via ${status.host}:${status.port}`
+  );
 
   setImmediate(() => {
     sendReservationConfirmationEmail(reservationData)
@@ -220,6 +260,7 @@ const queueReservationConfirmationEmail = (reservation) => {
 };
 
 module.exports = {
+  getEmailConfigStatus,
   isEmailConfigured,
   queueReservationConfirmationEmail,
   sendReservationConfirmationEmail,

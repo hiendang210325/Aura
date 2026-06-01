@@ -5,6 +5,8 @@ const {
   registerUser,
   loginUser,
   loginAdmin,
+  refreshAccessToken,
+  logoutUser,
   getUserProfile,
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
@@ -21,6 +23,8 @@ router.post(
 
 router.post('/login', loginUser);
 router.post('/admin/login', loginAdmin);
+router.post('/refresh', refreshAccessToken);
+router.post('/logout', logoutUser);
 
 router.route('/profile').get(protect, getUserProfile);
 

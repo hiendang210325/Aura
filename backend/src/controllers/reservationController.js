@@ -1,4 +1,5 @@
 const Reservation = require("../models/reservationModel");
+const Table = require("../models/tableModel");
 const BaseController = require("./BaseController");
 const BaseRepository = require("../repositories/BaseRepository");
 const { queueReservationConfirmationEmail } = require("../services/emailService");
@@ -25,6 +26,7 @@ class ReservationController extends BaseController {
 
     // Bind method riêng
     this.createPublic = this.createPublic.bind(this);
+    this.getMine = this.getMine.bind(this);
   }
 
   /** Override: Filter theo status và date */
@@ -100,6 +102,7 @@ class ReservationController extends BaseController {
       }
 
       const reservation = await this.repository.create({
+        user: req.user?._id || null,
         name: normalizedName,
         phone: normalizedPhone,
         email: normalizedEmail,
@@ -124,6 +127,36 @@ class ReservationController extends BaseController {
           : "Đặt bàn thành công! Chúng tôi đã ghi nhận thông tin và sẽ liên hệ xác nhận sớm nhất.",
         emailQueued,
         data: reservation,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getMine(req, res, next) {
+    try {
+      const reservations = await Reservation.find({ user: req.user._id })
+        .sort({ date: -1, time: -1, createdAt: -1 })
+        .limit(20);
+      const tableIds = [
+        ...new Set(
+          reservations
+            .map((reservation) => reservation.table)
+            .filter((tableId) => tableId && tableId !== "ChÆ°a phÃ¢n"),
+        ),
+      ];
+      const tables = await Table.find({ tableId: { $in: tableIds } }).lean();
+      const tableById = new Map(tables.map((table) => [table.tableId, table]));
+      const data = reservations.map((reservation) => {
+        const payload = reservation.toObject();
+        payload.tableInfo = tableById.get(reservation.table) || null;
+        return payload;
+      });
+
+      res.json({
+        success: true,
+        count: data.length,
+        data,
       });
     } catch (err) {
       next(err);
