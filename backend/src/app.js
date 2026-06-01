@@ -10,6 +10,7 @@ const promotionRoutes = require("./routes/promotionRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
+const path = require("path");
 
 // Initialize express app
 const app = express();
@@ -34,9 +35,21 @@ app.use("/api/v1/settings", settingsRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
 
 // Base route for testing
-app.get("/", (req, res) => {
-  res.send("API is running...");
-});
+if (process.env.NODE_ENV !== "production") {
+  app.get("/", (req, res) => {
+    res.send("API is running...");
+  });
+}
+
+if (process.env.NODE_ENV === "production") {
+  const frontendDistPath = path.join(__dirname, "../../frontend/dist");
+
+  app.use(express.static(frontendDistPath));
+
+  app.get(/^\/(?!api(?:\/|$)).*/, (req, res) => {
+    res.sendFile(path.join(frontendDistPath, "index.html"));
+  });
+}
 
 // Error Handling Middlewares
 app.use(notFound);
