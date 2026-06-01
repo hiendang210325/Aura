@@ -17,7 +17,7 @@ export const useAdminLogin = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/auth/admin/login",
+        "/api/v1/auth/admin/login",
         {
           email,
           password,

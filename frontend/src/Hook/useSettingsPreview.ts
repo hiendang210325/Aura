@@ -16,7 +16,7 @@ interface SettingsForm {
   depositPercent: number;
 }
 
-const API = "http://localhost:5000/api/v1/settings";
+const API = "/api/v1/settings";
 
 const initialSettings: SettingsForm = {
   restaurantName: "AURA Luxury Dining",

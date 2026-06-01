@@ -29,7 +29,7 @@ interface CustomerProfile {
   history: Reservation[];
 }
 
-const API = "http://localhost:5000/api/v1/reservations";
+const API = "/api/v1/reservations";
 
 const normalizePhone = (phone: string) => phone.replace(/\s+/g, "").toLowerCase();
 

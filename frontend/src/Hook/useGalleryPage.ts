@@ -18,7 +18,7 @@ export const useGalleryPage = (galleryImages: GalleryImage[]) => {
   useEffect(() => {
     const fetchSignatureDishes = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/menu");
+        const response = await axios.get("/api/v1/menu");
         const allItems = response.data.data || [];
         const signature = allItems
           .filter((item: any) => item.featured)

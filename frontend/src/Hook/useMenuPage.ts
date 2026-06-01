@@ -39,8 +39,8 @@ export const useMenuPage = () => {
     const fetchData = async () => {
       try {
         const [menuRes, comboRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/v1/menu"),
-          axios.get("http://localhost:5000/api/v1/combos"),
+          axios.get("/api/v1/menu"),
+          axios.get("/api/v1/combos"),
         ]);
         setMenuItems(menuRes.data.data || []);
         setCombos(comboRes.data.data || []);

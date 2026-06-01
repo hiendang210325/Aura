@@ -28,7 +28,7 @@ interface PromotionForm {
   displayOrder: number;
 }
 
-const API = "http://localhost:5000/api/v1/promotions";
+const API = "/api/v1/promotions";
 const STATUS_FILTERS = ["Tất cả", "Đang áp dụng", "Tạm dừng"] as const;
 
 const initialForm: PromotionForm = {

@@ -68,9 +68,9 @@ export const useTableAvailability = () => {
         setLoading(true);
         setError("");
         const [tablesRes, reservationsRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/v1/tables", config),
+          axios.get("/api/v1/tables", config),
           axios.get(
-            `http://localhost:5000/api/v1/reservations?date=${selectedDate}`,
+            `/api/v1/reservations?date=${selectedDate}`,
             config,
           ),
         ]);
@@ -88,7 +88,7 @@ export const useTableAvailability = () => {
 
   const refreshReservations = async () => {
     const { data } = await axios.get(
-      `http://localhost:5000/api/v1/reservations?date=${selectedDate}`,
+      `/api/v1/reservations?date=${selectedDate}`,
       config,
     );
     setReservations(data.data);
@@ -98,7 +98,7 @@ export const useTableAvailability = () => {
     try {
       setActionLoading(true);
       await axios.patch(
-        `http://localhost:5000/api/v1/reservations/${resId}/status`,
+        `/api/v1/reservations/${resId}/status`,
         { status: newStatus },
         config,
       );
@@ -115,7 +115,7 @@ export const useTableAvailability = () => {
     try {
       setActionLoading(true);
       await axios.put(
-        `http://localhost:5000/api/v1/reservations/${resId}`,
+        `/api/v1/reservations/${resId}`,
         { table: tableId },
         config,
       );

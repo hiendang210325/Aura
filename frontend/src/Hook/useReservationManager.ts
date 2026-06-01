@@ -57,7 +57,7 @@ export const useReservationManager = () => {
 
   const fetchTables = async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/v1/tables", config);
+      const { data } = await axios.get("/api/v1/tables", config);
       setTablesList(data.data);
     } catch (err) {
       console.error("Failed to fetch tables", err);
@@ -68,7 +68,7 @@ export const useReservationManager = () => {
     try {
       setLoading(true);
       const { data } = await axios.get(
-        "http://localhost:5000/api/v1/reservations",
+        "/api/v1/reservations",
         config,
       );
       setReservations(data.data);
@@ -88,7 +88,7 @@ export const useReservationManager = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa đặt bàn này không?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/v1/reservations/${id}`, config);
+        await axios.delete(`/api/v1/reservations/${id}`, config);
         setReservations((current) => current.filter((r) => r._id !== id));
       } catch (err: any) {
         alert(err.response?.data?.message || "Xóa thất bại");
@@ -99,7 +99,7 @@ export const useReservationManager = () => {
   const handleStatusUpdate = async (id: string, status: string) => {
     try {
       const { data } = await axios.patch(
-        `http://localhost:5000/api/v1/reservations/${id}/status`,
+        `/api/v1/reservations/${id}/status`,
         { status },
         config,
       );
@@ -138,7 +138,7 @@ export const useReservationManager = () => {
     try {
       if (editingId) {
         const { data } = await axios.put(
-          `http://localhost:5000/api/v1/reservations/${editingId}`,
+          `/api/v1/reservations/${editingId}`,
           formData,
           config,
         );
@@ -147,7 +147,7 @@ export const useReservationManager = () => {
         );
       } else {
         const { data } = await axios.post(
-          "http://localhost:5000/api/v1/reservations",
+          "/api/v1/reservations",
           formData,
           config,
         );

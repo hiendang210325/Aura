@@ -13,7 +13,7 @@ interface MenuItem {
   featured: boolean;
 }
 
-const API = "http://localhost:5000/api/v1/menu";
+const API = "/api/v1/menu";
 const ITEMS_PER_PAGE = 9;
 
 const initialForm = {

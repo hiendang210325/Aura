@@ -17,7 +17,7 @@ export const useSignatureDishes = () => {
   useEffect(() => {
     const fetchSignatureDishes = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/menu");
+        const response = await axios.get("/api/v1/menu");
         const allItems: MenuItem[] = response.data.data || [];
         const signature = allItems.filter((item) => item.featured).slice(0, 6);
         setDishes(signature);

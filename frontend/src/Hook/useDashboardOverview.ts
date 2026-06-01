@@ -29,8 +29,8 @@ export const useDashboardOverview = () => {
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
         const [resResponse, tableResponse] = await Promise.all([
-          axios.get("http://localhost:5000/api/v1/reservations", config),
-          axios.get("http://localhost:5000/api/v1/tables", config),
+          axios.get("/api/v1/reservations", config),
+          axios.get("/api/v1/tables", config),
         ]);
 
         setReservations(resResponse.data.data || []);

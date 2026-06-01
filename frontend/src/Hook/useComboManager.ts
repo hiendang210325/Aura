@@ -28,7 +28,7 @@ interface ComboForm {
   featured: boolean;
 }
 
-const API = "http://localhost:5000/api/v1/combos";
+const API = "/api/v1/combos";
 const ITEMS_PER_PAGE = 6;
 const STATUS_FILTERS = ["Tất cả", "Đang hoạt động", "Ngừng hoạt động"] as const;
 

@@ -11,7 +11,7 @@ interface Promotion {
   featured: boolean;
 }
 
-const API = "http://localhost:5000/api/v1/promotions/public?limit=10";
+const API = "/api/v1/promotions/public?limit=10";
 
 export const usePromoBanner = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);

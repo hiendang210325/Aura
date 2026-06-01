@@ -18,7 +18,7 @@ export const useDiningCombos = () => {
   useEffect(() => {
     const fetchCombos = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/combos");
+        const response = await axios.get("/api/v1/combos");
         const allCombos: Combo[] = response.data.data || [];
         const featuredCombos = allCombos
           .filter((combo) => combo.featured)

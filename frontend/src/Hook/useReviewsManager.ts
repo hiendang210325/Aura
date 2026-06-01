@@ -27,7 +27,7 @@ interface ReviewForm {
   status: ReviewStatus;
 }
 
-const API = "http://localhost:5000/api/v1/reviews";
+const API = "/api/v1/reviews";
 const STATUS_FILTERS = ["Tất cả", "Mới", "Đã phản hồi", "Đã ẩn"] as const;
 
 const initialForm: ReviewForm = {

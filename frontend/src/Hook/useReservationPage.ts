@@ -73,7 +73,7 @@ export const useReservationPage = () => {
     setErrorMsg("");
 
     try {
-      await axios.post("http://localhost:5000/api/v1/reservations/public", {
+      await axios.post("/api/v1/reservations/public", {
         name: formData.name,
         phone: formData.phone,
         email: formData.email,
